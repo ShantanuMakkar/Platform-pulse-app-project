@@ -1,0 +1,50 @@
+name: Build and Push
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: 571062159919.dkr.ecr.us-east-1.amazonaws.com/platform-pulse
+  AWS_ROLE_ARN: arn:aws:iam::571062159919:role/platform-pulse-dev-gha-ecr-push
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Sanity check app imports
+        run: |
+          pip install -r requirements.txt
+          python -c "import app"
+
+      - name: Configure AWS credentials (OIDC — no static keys)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push image
+        run: |
+          BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          docker build \
+            --build-arg GIT_SHA=${{ github.sha }} \
+            --build-arg BUILD_TIME=$BUILD_TIME \
+            -t $ECR_REPOSITORY:${{ github.sha }} \
+            .
+          docker push $ECR_REPOSITORY:${{ github.sha }}
