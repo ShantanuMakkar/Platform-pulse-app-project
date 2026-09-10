@@ -26,4 +26,4 @@ DYNAMODB_TABLE=platform-pulse-dev-hits AWS_REGION=us-east-1 python app.py
 
 Needs local AWS credentials with access to that table to actually increment
 the counter; without `DYNAMODB_TABLE` set, the page still renders with
-"N/A" in place of the visit count..
+"N/A" in place of the visit count...
