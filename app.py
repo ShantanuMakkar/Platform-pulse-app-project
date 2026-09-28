@@ -35,7 +35,7 @@ PAGE = """
 </head>
 <body>
   <div class="card">
-    <h1>Platform Pulse</h1>
+    <h1>Platform Pulse Testing</h1>
     <div class="sub">Deployed on EKS via ArgoCD</div>
     <div class="stat">
       <div class="label">Visits</div>
